@@ -19,7 +19,9 @@ from omni.isaac.lab_tasks.manager_based.manipulation.lift.lift_env_cfg import Li
 ##
 from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
-
+from omni.isaac.lab.assets import ArticulationCfg
+from omni.isaac.lab.actuators.actuator_cfg import ImplicitActuatorCfg
+import omni.isaac.lab.sim as sim_utils
 
 @configclass
 class FrankaCubeLiftEnvCfg(LiftEnvCfg):
@@ -28,29 +30,83 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        self.scene.robot = FRANKA_PANDA_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = ArticulationCfg(
+            prim_path="/World/envs/env_.*/Robot",
+            spawn=sim_utils.UsdFileCfg(
+                usd_path=f"/home/sangfor/Documents/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Collected_stardust_pro/stardust_pro.usd",
+                activate_contact_sensors=False,
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    disable_gravity=False,
+                    max_depenetration_velocity=5.0,
+                ),
+                articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+                    enabled_self_collisions=True,
+                    solver_position_iteration_count=8,
+                    solver_velocity_iteration_count=0,
+                    fix_root_link=True,
+                ),
+            ),
+            init_state=ArticulationCfg.InitialStateCfg(
+                joint_pos={
+                    "left_wheel_joint": 0.0,
+                    "right_wheel_joint": 0.0,
+                    "joint1": 0.0,
+                    "joint2": 0.0,
+                    "joint3": 0.0,
+                    "joint4": 0.0,
+                    "joint5": 0.0,
+                    "tool_leftfingerjoint": 0.0,
+                    "tool_rightfingerjoint": -0.0,
+                },
+                pos=(0.0, 0.0, 0.07),
+                rot=(1, 0, 0, 0.0),
+            ),
+            actuators={
+                "wheel": ImplicitActuatorCfg(
+                    joint_names_expr=["left_wheel_joint", "right_wheel_joint", ],
+                    effort_limit=87.0,
+                    velocity_limit=2.175,
+                    stiffness=80.0,
+                    damping=4.0,
+                ),
+                "arm": ImplicitActuatorCfg(
+                    joint_names_expr=["joint1", "joint2", "joint3", "joint4", "joint5", ],
+                    effort_limit=12.0,
+                    velocity_limit=2.61,
+                    stiffness=80.0,
+                    damping=4.0,
+                ),
+                "finger": ImplicitActuatorCfg(
+                    joint_names_expr=["tool_leftfingerjoint", "tool_rightfingerjoint"],
+                    effort_limit=200.0,
+                    velocity_limit=0.2,
+                    stiffness=2e3,
+                    damping=1e2,
+                ),
+
+            },
+        )
 
         # Set actions for the specific robot type (franka)
-        self.actions.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=["panda_joint.*"], scale=0.5, use_default_offset=True
+        self.actions.body_joint_pos = mdp.JointPositionActionCfg(
+            asset_name="robot", joint_names=["joint.*"], scale=0.5, use_default_offset=True
         )
-        self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
+        self.actions.finger_joint_pos = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
-            joint_names=["panda_finger.*"],
-            open_command_expr={"panda_finger_.*": 0.04},
-            close_command_expr={"panda_finger_.*": 0.0},
+            joint_names=["tool_leftfingerjoint", "tool_rightfingerjoint"],
+            open_command_expr={"tool_leftfingerjoint": 0.0, "tool_rightfingerjoint": -0.0},
+            close_command_expr={"tool_leftfingerjoint": 0.05, "tool_rightfingerjoint": -0.05},
         )
-        # Set the body name for the end effector
-        self.commands.object_pose.body_name = "panda_hand"
 
         # Set Cube as object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.5, 0, 0.055], rot=[1, 0, 0, 0]),
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0.3, 0.03], rot=[1, 0, 0, 0]),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(
+                    rigid_body_enabled = True,
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
                     max_angular_velocity=1000.0,
@@ -58,6 +114,7 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                     max_depenetration_velocity=5.0,
                     disable_gravity=False,
                 ),
+                mass_props=sim_utils.MassPropertiesCfg(density=400.0),
             ),
         )
 
@@ -66,15 +123,15 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
         marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
         marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/panda_link0",
+            prim_path="{ENV_REGEX_NS}/Robot/stardust_pro/base_footprint",
             debug_vis=False,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/panda_hand",
+                    prim_path="{ENV_REGEX_NS}/Robot/stardust_pro/tool_leftfinger_link",
                     name="end_effector",
                     offset=OffsetCfg(
-                        pos=[0.0, 0.0, 0.1034],
+                        pos=[0.0, 0.0, -0.0], #TODO: center from tool_link, initial: 0.1034
                     ),
                 ),
             ],

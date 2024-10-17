@@ -1,0 +1,47 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/stardust_pro_1.usd",
+            "source_hash": "3e275f593980837e579382a73b9c8cab94a162b2",
+            "target_url": "./stardust_pro_1.usd",
+            "target_hash": "6447916c607ca931815bf9a1a92543084b8dc0df"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Base_color.png",
+            "source_hash": "705c82e90ac6dd0ea78589ce1337ff104a636b1d",
+            "target_url": "./Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Base_color.png",
+            "target_hash": "0f7cb373ee7ce568c157d1bba0b1f48216b8a02a"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Metallic.png",
+            "source_hash": "bc9e1e0b13881242f5b235468fa565f52c75937a",
+            "target_url": "./Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Metallic.png",
+            "target_hash": "9c321cd2b5793c58ef5740e4b3b32fac92a59dbe"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Mixed_AO.png",
+            "source_hash": "06bb461bb2625ac27a25b383f2947508ba3a3168",
+            "target_url": "./Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Mixed_AO.png",
+            "target_hash": "de4ec92e8c5f0d7421c0b972046746ae60537d04"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Normal.png",
+            "source_hash": "6c2b344f8e5dd46692df6b0ecc7066d88aa38473",
+            "target_url": "./Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Normal.png",
+            "target_hash": "2265fa646ab860f4fa1f94646dac2b8b9733fea6"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Roughness.png",
+            "source_hash": "bef94933b3084f9c6ef4e61e6c019804d2e13fa1",
+            "target_url": "./Downloads/9_3_stardust_pro_suiji/stardustpro_robot_93/stardustpro_robot/urdf/stardustpro_robot_95/Collected_stardustpro_robot/UV/material_A69E96_Roughness.png",
+            "target_hash": "970e22b191d3f563141855e054e151f4fd6d3a5b"
+        },
+        {
+            "source_url": "/home/stardust/Documents/Collected_stardust_pro_1/TF_pub.py",
+            "source_hash": "731705f438a13068eef32882dd310097c9f2e406",
+            "target_url": "./TF_pub.py",
+            "target_hash": "f962bbed70d89a7e9f23d3ba9a5ae61eda3a31c8"
+        }
+    ]
+}

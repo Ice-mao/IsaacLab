@@ -3,16 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from omni.isaac.lab.assets import DeformableObjectCfg
 from omni.isaac.lab.controllers.differential_ik_cfg import DifferentialIKControllerCfg
 from omni.isaac.lab.envs.mdp.actions.actions_cfg import DifferentialInverseKinematicsActionCfg
-from omni.isaac.lab.managers import EventTermCfg as EventTerm
-from omni.isaac.lab.managers import SceneEntityCfg
-from omni.isaac.lab.sim.spawners import UsdFileCfg
 from omni.isaac.lab.utils import configclass
-from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
-
-import omni.isaac.lab_tasks.manager_based.manipulation.lift.mdp as mdp
 
 from . import joint_pos_env_cfg
 
@@ -20,12 +13,9 @@ from . import joint_pos_env_cfg
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_HIGH_PD_CFG  # isort: skip
-
-
-##
-# Rigid object lift environment.
-##
-
+from omni.isaac.lab.assets import ArticulationCfg
+from omni.isaac.lab.actuators.actuator_cfg import ImplicitActuatorCfg
+import omni.isaac.lab.sim as sim_utils
 
 @configclass
 class FrankaCubeLiftEnvCfg(joint_pos_env_cfg.FrankaCubeLiftEnvCfg):
@@ -34,16 +24,72 @@ class FrankaCubeLiftEnvCfg(joint_pos_env_cfg.FrankaCubeLiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        # We switch here to a stiffer PD controller for IK tracking to be better.
-        self.scene.robot = FRANKA_PANDA_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = ArticulationCfg(
+            prim_path="/World/envs/env_.*/Robot",
+            spawn=sim_utils.UsdFileCfg(
+                usd_path=f"/home/sangfor/Documents/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Collected_stardust_pro",
+                activate_contact_sensors=False,
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    disable_gravity=True,
+                    max_depenetration_velocity=5.0,
+                ),
+                articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+                    enabled_self_collisions=True,
+                    solver_position_iteration_count=8,
+                    solver_velocity_iteration_count=0,
+                    fix_root_link=True,
+                ),
+            ),
+            init_state=ArticulationCfg.InitialStateCfg(
+                joint_pos={
+                    "left_wheel_joint": 0.0,
+                    "right_wheel_joint": 0.0,
+                    "joint1": 0.0,
+                    "joint2": 0.0,
+                    "joint3": 0.0,
+                    "joint4": 0.0,
+                    "joint5": 0.0,
+                    "tool_leftfingerjoint": 0.0,
+                    "tool_rightfingerjoint": -0.0,
+                },
+                pos=(0.0, 0.0, 0.07),
+                rot=(1, 0, 0, 0.0),
+            ),
+            actuators={
+                "wheel": ImplicitActuatorCfg(
+                    joint_names_expr=["left_wheel_joint", "right_wheel_joint", ],
+                    effort_limit=87.0,
+                    velocity_limit=2.175,
+                    stiffness=80.0,
+                    damping=4.0,
+                    # friction=0.0001,
+                ),
+                "arm": ImplicitActuatorCfg(
+                    joint_names_expr=["joint1", "joint2", "joint3", "joint4", "joint5", ],
+                    effort_limit=87.0,
+                    velocity_limit=2.0944,
+                    stiffness=400.0,
+                    damping=80.0,
+                    # friction=0.0001,
+                ),
+                "finger": ImplicitActuatorCfg(
+                    joint_names_expr=["tool_leftfingerjoint", "tool_rightfingerjoint"],
+                    effort_limit=20.0,
+                    velocity_limit=0.1,
+                    stiffness=2e3,
+                    damping=1e2,
+                ),
+
+            },
+        )
 
         # Set actions for the specific robot type (franka)
-        self.actions.arm_action = DifferentialInverseKinematicsActionCfg(
+        self.actions.body_joint_pos = DifferentialInverseKinematicsActionCfg(
             asset_name="robot",
-            joint_names=["panda_joint.*"],
-            body_name="panda_hand",
+            joint_names=["joint.*"],
+            body_name="tool_leftfinger_link",
             controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls"),
-            body_offset=DifferentialInverseKinematicsActionCfg.OffsetCfg(pos=[0.0, 0.0, 0.107]),
+            body_offset=DifferentialInverseKinematicsActionCfg.OffsetCfg(pos=[0.0, 0.0, 0.0]),
         )
 
 
@@ -57,54 +103,3 @@ class FrankaCubeLiftEnvCfg_PLAY(FrankaCubeLiftEnvCfg):
         self.scene.env_spacing = 2.5
         # disable randomization for play
         self.observations.policy.enable_corruption = False
-
-
-##
-# Deformable object lift environment.
-##
-
-
-@configclass
-class FrankaTeddyBearLiftEnvCfg(FrankaCubeLiftEnvCfg):
-    def __post_init__(self):
-        # post init of parent
-        super().__post_init__()
-
-        self.scene.object = DeformableObjectCfg(
-            prim_path="{ENV_REGEX_NS}/Object",
-            init_state=DeformableObjectCfg.InitialStateCfg(pos=(0.5, 0, 0.05), rot=(0.707, 0, 0, 0.707)),
-            spawn=UsdFileCfg(
-                usd_path=f"{ISAACLAB_NUCLEUS_DIR}/Objects/Teddy_Bear/teddy_bear.usd",
-                scale=(0.01, 0.01, 0.01),
-            ),
-        )
-
-        # Make the end effector less stiff to not hurt the poor teddy bear
-        self.scene.robot.actuators["panda_hand"].effort_limit = 50.0
-        self.scene.robot.actuators["panda_hand"].stiffness = 40.0
-        self.scene.robot.actuators["panda_hand"].damping = 10.0
-
-        # Disable replicate physics as it doesn't work for deformable objects
-        # FIXME: This should be fixed by the PhysX replication system.
-        self.scene.replicate_physics = False
-
-        # Set events for the specific object type (deformable cube)
-        self.events.reset_object_position = EventTerm(
-            func=mdp.reset_nodal_state_uniform,
-            mode="reset",
-            params={
-                "position_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
-                "velocity_range": {},
-                "asset_cfg": SceneEntityCfg("object"),
-            },
-        )
-
-        # Remove all the terms for the state machine demo
-        # TODO: Computing the root pose of deformable object from nodal positions is expensive.
-        #       We need to fix that part before enabling these terms for the training.
-        self.terminations.object_dropping = None
-        self.rewards.reaching_object = None
-        self.rewards.lifting_object = None
-        self.rewards.object_goal_tracking = None
-        self.rewards.object_goal_tracking_fine_grained = None
-        self.observations.policy.object_position = None
