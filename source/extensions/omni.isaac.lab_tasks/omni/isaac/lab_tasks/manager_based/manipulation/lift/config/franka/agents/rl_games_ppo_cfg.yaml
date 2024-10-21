@@ -36,7 +36,7 @@ params:
       regularizer:
         name: None
 
-  load_checkpoint: True # flag which sets whether to load the checkpoint
+  load_checkpoint: False # flag which sets whether to load the checkpoint
   load_path: 'logs/rl_games/franka_lift/2024-10-16_11-05-05/nn/last_franka_lift_ep_4500_rew__8.930602_.pth' # path to the checkpoint to load
 
   config:

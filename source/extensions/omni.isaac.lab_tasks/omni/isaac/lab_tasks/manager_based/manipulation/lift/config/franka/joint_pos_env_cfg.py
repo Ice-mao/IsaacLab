@@ -36,7 +36,7 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                 usd_path=f"/home/sangfor/Documents/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Collected_stardust_pro/stardust_pro.usd",
                 activate_contact_sensors=False,
                 rigid_props=sim_utils.RigidBodyPropertiesCfg(
-                    disable_gravity=False,
+                    disable_gravity=True,
                     max_depenetration_velocity=5.0,
                 ),
                 articulation_props=sim_utils.ArticulationRootPropertiesCfg(
@@ -51,8 +51,8 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                     "left_wheel_joint": 0.0,
                     "right_wheel_joint": 0.0,
                     "joint1": 0.0,
-                    "joint2": 0.0,
-                    "joint3": 0.0,
+                    "joint2": 0.6,
+                    "joint3": 0.3,
                     "joint4": 0.0,
                     "joint5": 0.0,
                     "tool_leftfingerjoint": 0.0,
@@ -78,7 +78,7 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                 ),
                 "finger": ImplicitActuatorCfg(
                     joint_names_expr=["tool_leftfingerjoint", "tool_rightfingerjoint"],
-                    effort_limit=200.0,
+                    effort_limit=100.0,
                     velocity_limit=0.2,
                     stiffness=2e3,
                     damping=1e2,
@@ -101,12 +101,11 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
         # Set Cube as object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0.3, 0.03], rot=[1, 0, 0, 0]),
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0, 0.03], rot=[1, 0, 0, 0]),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(
-                    rigid_body_enabled = True,
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
                     max_angular_velocity=1000.0,
@@ -114,7 +113,6 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                     max_depenetration_velocity=5.0,
                     disable_gravity=False,
                 ),
-                mass_props=sim_utils.MassPropertiesCfg(density=400.0),
             ),
         )
 
@@ -131,7 +129,7 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
                     prim_path="{ENV_REGEX_NS}/Robot/stardust_pro/tool_leftfinger_link",
                     name="end_effector",
                     offset=OffsetCfg(
-                        pos=[0.0, 0.0, -0.0], #TODO: center from tool_link, initial: 0.1034
+                        pos=[0.0, -0.05, -0.0], #TODO: center from tool_link, initial: 0.1034
                     ),
                 ),
             ],

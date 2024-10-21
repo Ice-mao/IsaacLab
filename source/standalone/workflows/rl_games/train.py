@@ -90,8 +90,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         agent_cfg["params"]["load_checkpoint"] = True
         agent_cfg["params"]["load_path"] = resume_path
         print(f"[INFO]: Loading model checkpoint from: {agent_cfg['params']['load_path']}")
-    else:
-        args_cli.checkpoint = "follow the rl yaml"
+    # else:
+    #     args_cli.checkpoint = "follow the rl yaml"
 
     train_sigma = float(args_cli.sigma) if args_cli.sigma is not None else None
 
