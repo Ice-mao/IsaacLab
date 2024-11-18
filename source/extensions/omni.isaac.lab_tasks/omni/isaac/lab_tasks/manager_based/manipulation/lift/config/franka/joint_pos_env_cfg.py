@@ -21,6 +21,7 @@ from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
 from omni.isaac.lab.assets import ArticulationCfg
 from omni.isaac.lab.actuators.actuator_cfg import ImplicitActuatorCfg
+from omni.isaac.lab.sensors import CameraCfg, ContactSensorCfg, RayCasterCfg, patterns
 import omni.isaac.lab.sim as sim_utils
 
 @configclass

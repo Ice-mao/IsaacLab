@@ -17,6 +17,7 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import FrameTransformerCfg
+from omni.isaac.lab.sensors import CameraCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
@@ -71,16 +72,26 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 @configclass
 class CommandsCfg:
     """Command terms for the MDP."""
-
+    object_pose_middle = mdp.UniformPoseCommandCfg(
+        asset_name="robot",
+        body_name="tool_leftfinger_link",
+        resampling_time_range=(5.0, 5.0),
+        debug_vis=False,
+        ranges=mdp.UniformPoseCommandCfg.Ranges(
+            pos_x=(0.6, 0.65), pos_y=(-0.05, 0.05), pos_z=(0.45, 0.5), roll=(0, 0), pitch=(0, 0), yaw=(0, 0)
+        ),
+    )
     object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
         body_name="tool_leftfinger_link",
         resampling_time_range=(5.0, 5.0),
-        debug_vis=True,
+        debug_vis=False,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.78, 0.78), pos_y=(-0.2, -0.2), pos_z=(0.3, 0.3), roll=(0, 0), pitch=(0, 0), yaw=(0, 0)
+            pos_x=(0.35, 0.37), pos_y=(-0.02, -0.01), pos_z=(0.63, 0.64), roll=(0, 0), pitch=(0, 0), yaw=(0, 0)
         ),
     )
+
+
 
 
 @configclass
@@ -103,6 +114,7 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        target_object_position_middle = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose_middle"})
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
@@ -120,6 +132,8 @@ class EventCfg:
 
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
+    reset_robot_period = EventTerm(func=mdp.reset_robot_period, mode="reset")
+
     reset_object_position = EventTerm(
         func=mdp.reset_root_state_uniform,
         mode="reset",
@@ -131,26 +145,34 @@ class EventCfg:
     )
 
 
+
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    #reaching_object_fined_grained = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=2.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=10.0)
 
-    object_goal_tracking = RewTerm(
+    object_goal_middle = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose_middle", "threshold": 0.13},
         weight=16.0,
     )
 
-    object_goal_tracking_fine_grained = RewTerm(
+    object_goal_final = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=5.0,
+        params={"std": 0.4, "minimal_height": 0.04, "command_name": "object_pose", "threshold": 0.08},
+        weight=160.0,
     )
+
+    # object_goal_final_stay = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.4, "minimal_height": 0.04, "command_name": "object_pose_stay", "threshold": 0.08},
+    #     weight=1600.0,
+    # )
+
+    object_placed = RewTerm(func=mdp.object_is_dropped, params={"std": 0.15}, weight=1600.0)
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
@@ -161,6 +183,9 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
+    # debug
+    # debug = RewTerm(func=mdp.debug_pp, params={"std": 0.15}, weight=0.01)
+
 
 @configclass
 class TerminationsCfg:
@@ -168,9 +193,9 @@ class TerminationsCfg:
 
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
-    object_dropping = DoneTerm(
-        func=mdp.root_height_below_minimum, params={"minimum_height": 0.0, "asset_cfg": SceneEntityCfg("object")}
-    )
+    # object_dropping = DoneTerm(
+    #     func=mdp.root_height_below_minimum, params={"minimum_height": 0.0, "asset_cfg": SceneEntityCfg("object")}
+    # )
 
 
 @configclass

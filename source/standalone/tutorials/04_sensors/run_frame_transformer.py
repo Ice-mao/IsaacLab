@@ -68,7 +68,7 @@ def define_sensor() -> FrameTransformer:
                 offset=OffsetCfg(pos=tuple(pos_offset.tolist()), rot=tuple(rot_offset[0].tolist())),
             ),
         ],
-        debug_vis=False,
+        debug_vis=True,
     )
     frame_transformer = FrameTransformer(frame_transformer_cfg)
 

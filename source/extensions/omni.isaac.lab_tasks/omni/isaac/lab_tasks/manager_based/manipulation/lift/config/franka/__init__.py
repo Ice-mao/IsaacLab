@@ -5,8 +5,8 @@
 import gymnasium as gym
 import os
 
-from . import agents, ik_abs_env_cfg, ik_rel_env_cfg, joint_pos_env_cfg
-
+from . import agents, ik_abs_env_cfg, ik_rel_env_cfg, joint_pos_env_cfg, joint_pos_env_cfg_camera
+from .joint_pos_env_cfg_camera import FrankaCubeLiftEnvCameraCfg
 ##
 # Register Gym environments.
 ##
@@ -23,6 +23,20 @@ gym.register(
         # "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftCubePPORunnerCfg,
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "sb3_cfg_entry_point": f"{agents.__name__}:sb3_ppo_cfg.yaml"
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
+    id="Isaac-Lift-Cube-Franka-Camera-v0",
+    entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": joint_pos_env_cfg_camera.FrankaCubeLiftEnvCameraCfg,
+        # "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.LiftCubePPORunnerCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg_camera.yaml",
+        "sb3_cfg_entry_point": f"{agents.__name__}:sb3_ppo_cfg.yaml"
     },
     disable_env_checker=True,
 )

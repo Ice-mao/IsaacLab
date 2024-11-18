@@ -129,6 +129,11 @@ def main():
     agent_cfg["params"]["config"]["num_actors"] = env.unwrapped.num_envs
     # create runner from rl-games
     runner = Runner()
+
+    from rl_games.algos_torch import model_builder
+    from learning.pick2place_network_builder import PickPlaceBuilder
+    model_builder.register_network('pickplace', lambda **kwargs : PickPlaceBuilder())
+
     runner.load(agent_cfg)
     # obtain the agent from the runner
     agent: BasePlayer = runner.create_player()

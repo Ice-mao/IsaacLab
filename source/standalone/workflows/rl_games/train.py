@@ -11,6 +11,7 @@ import argparse
 import sys
 
 from omni.isaac.lab.app import AppLauncher
+from learning.pick2place_network_builder import PickPlaceBuilder
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RL-Games.")
@@ -90,6 +91,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         agent_cfg["params"]["load_checkpoint"] = True
         agent_cfg["params"]["load_path"] = resume_path
         print(f"[INFO]: Loading model checkpoint from: {agent_cfg['params']['load_path']}")
+        
+    if agent_cfg["params"]["load_checkpoint"]:
+        args_cli.checkpoint = "follow the rl yaml"
     # else:
     #     args_cli.checkpoint = "follow the rl yaml"
 
@@ -162,6 +166,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     agent_cfg["params"]["config"]["num_actors"] = env.unwrapped.num_envs
     # create runner from rl-games
     runner = Runner(IsaacAlgoObserver())
+    # create own custom network module
+    from rl_games.algos_torch import model_builder
+    # runner.algo_factory.register_builder('amp_continuous', lambda **kwargs : amp_continuous.AMPAgent(**kwargs))
+    # runner.player_factory.register_builder('amp_continuous', lambda **kwargs : amp_players.AMPPlayerContinuous(**kwargs))
+    model_builder.register_network('pickplace', lambda **kwargs : PickPlaceBuilder())
+
     runner.load(agent_cfg)
 
     # reset the agent and env

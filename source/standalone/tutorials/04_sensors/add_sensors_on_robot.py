@@ -119,7 +119,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
                 scene["robot"].data.default_joint_pos.clone(),
                 scene["robot"].data.default_joint_vel.clone(),
             )
-            joint_pos += torch.rand_like(joint_pos) * 0.1
+            # joint_pos += torch.rand_like(joint_pos) * 0.1
             scene["robot"].write_joint_state_to_sim(joint_pos, joint_vel)
             # clear internal buffers
             scene.reset()
