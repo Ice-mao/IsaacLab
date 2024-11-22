@@ -44,11 +44,12 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     object: RigidObjectCfg = MISSING
 
     # Table
-    # table = AssetBaseCfg(
-    #     prim_path="{ENV_REGEX_NS}/Table",
-    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
-    #     spawn=UsdFileCfg(usd_path="/home/stardust/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/SeattleLabTable/table_instanceable.usd"),
-    # )
+    table = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Table",
+        init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
+        # spawn=UsdFileCfg(usd_path="/home/stardust/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/SeattleLabTable/table_instanceable.usd"),
+        spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+    )
 
     # plane
     plane = AssetBaseCfg(
@@ -76,7 +77,7 @@ class CommandsCfg:
         asset_name="robot",
         body_name="tool_leftfinger_link",
         resampling_time_range=(5.0, 5.0),
-        debug_vis=False,
+        debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.6, 0.65), pos_y=(-0.05, 0.05), pos_z=(0.45, 0.5), roll=(0, 0), pitch=(0, 0), yaw=(0, 0)
         ),
@@ -85,7 +86,7 @@ class CommandsCfg:
         asset_name="robot",
         body_name="tool_leftfinger_link",
         resampling_time_range=(5.0, 5.0),
-        debug_vis=False,
+        debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.35, 0.37), pos_y=(-0.02, -0.01), pos_z=(0.63, 0.64), roll=(0, 0), pitch=(0, 0), yaw=(0, 0)
         ),
@@ -114,8 +115,8 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        target_object_position_middle = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose_middle"})
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+        target_object_position_middle = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose_middle"})
+        target_object_position = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -172,7 +173,7 @@ class RewardsCfg:
     #     weight=1600.0,
     # )
 
-    object_placed = RewTerm(func=mdp.object_is_dropped, params={"std": 0.15}, weight=1600.0)
+    # object_placed = RewTerm(func=mdp.object_is_dropped, params={"std": 0.15}, weight=160.0)
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)

@@ -139,8 +139,11 @@ class RewardManager(ManagerBase):
             value = term_cfg.func(self._env, **term_cfg.params) * term_cfg.weight * dt
             # update total reward
             self._reward_buf += value
+            # DEBUG
+            print(name+':'+str(round(value.mean().item(),ndigits=4)), end=' ')
             # update episodic sum
             self._episode_sums[name] += value
+        print('\n')
 
         return self._reward_buf
 

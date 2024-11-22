@@ -40,8 +40,8 @@ params:
 #       units: 64
 #       layers: 1
 
-  load_checkpoint: True # flag which sets whether to load the checkpoint
-  load_path: 'logs/rl_games/franka_lift/2024-11-15_09-51-46/nn/last_franka_lift_ep_12000_rew__809.8513_.pth' # path to the checkpoint to load
+  load_checkpoint: False # flag which sets whether to load the checkpoint
+  load_path: 'logs/rl_games/franka_lift/2024-11-19_17-18-47/nn/last_franka_lift_ep_24000_rew__1.5460646_.pth' # path to the checkpoint to load
 
   config:
     name: franka_lift
@@ -64,8 +64,8 @@ params:
     lr_schedule: adaptive
     schedule_type: legacy
     kl_threshold: 0.01
-    score_to_win: 100000000
-    max_epochs: 24000
+    score_to_win: 100000
+    max_epochs: 12000
     save_best_after: 100
     save_frequency: 50
     print_stats: True

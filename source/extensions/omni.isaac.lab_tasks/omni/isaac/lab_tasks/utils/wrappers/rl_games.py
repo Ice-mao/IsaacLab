@@ -292,20 +292,25 @@ class RlGamesVecEnvWrapper(IVecEnv):
         obs = obs.to(device=self._rl_device).clone()
 
         # check if asymmetric actor-critic or not
-        if self.rlg_num_states > 0:
-            # acquire states from the environment if it exists
-            try:
-                states = obs_dict["critic"]
-            except AttributeError:
-                raise NotImplementedError("Environment does not define key 'critic' for privileged observations.")
-            # clip the states
-            states = torch.clamp(states, -self._clip_obs, self._clip_obs)
-            # move buffers to rl-device
-            states = states.to(self._rl_device).clone()
-            # convert to dictionary
-            return {"obs": obs, "states": states}
+        # if self.rlg_num_states > 0:
+        #     # acquire states from the environment if it exists
+        #     try:
+        #         states = obs_dict["critic"]
+        #     except AttributeError:
+        #         raise NotImplementedError("Environment does not define key 'critic' for privileged observations.")
+        #     # clip the states
+        #     states = torch.clamp(states, -self._clip_obs, self._clip_obs)
+        #     # move buffers to rl-device
+        #     states = states.to(self._rl_device).clone()
+        #     # convert to dictionary
+        #     return {"obs": obs, "states": states}
+        if 'privilege' in obs_dict:
+            return {"obs": obs, "privilege": obs}
         else:
-            return obs
+            return {"obs": obs}
+        
+        # if len(obs_dict) > 1:
+
 
 
 """

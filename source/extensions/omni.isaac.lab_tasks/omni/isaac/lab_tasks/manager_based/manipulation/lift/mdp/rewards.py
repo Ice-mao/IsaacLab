@@ -23,7 +23,8 @@ def object_is_lifted(
 ) -> torch.Tensor:
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
-    return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+    robot: RigidObject = env.scene['robot']
+    return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0) * (robot.period < 2)
 
 
 def object_ee_distance(
@@ -45,6 +46,7 @@ def object_ee_distance(
     # Distance of the end-effector to the object: (num_envs,)
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
     reward = (1 - torch.tanh(object_ee_distance / std)) * (robot.period < 2) + 1.0 * (robot.period == 2)
+    # reward = (1 - torch.tanh(object_ee_distance / std)) * (robot.period < 2)
     return reward
 
 
@@ -67,7 +69,7 @@ def object_is_dropped(
     # Distance of the end-effector to the object: (num_envs,)
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
     #robot.period >= 2
-    reward = (robot.period == 2) * torch.sum(env.action_manager.action[:,5] > 0.5, dim=-1) / env.num_envs
+    reward = (robot.period == 2) * env.action_manager.action[:,5] > 0.5
     # reward = (robot.period >= 2) * torch.tanh(object_ee_distance / std)
     return reward
 
@@ -101,7 +103,7 @@ def object_goal_distance(
     if command_name=="object_pose":
         robot.period[torch.logical_and(distance < threshold, robot.period == 1)] = 2
         reward = ((object.data.root_pos_w[:, 2] > minimal_height) *
-                  (1.0 - torch.tanh(distance / std)) * (robot.period == 1) +
+                  (1.0 - torch.tanh(torch.ones_like(distance / std))) * (robot.period < 2) +
                   (object.data.root_pos_w[:, 2] > minimal_height) *
                   (1.0 - torch.tanh(distance / std)) * (robot.period == 2)) # 稳定最终状态
                 #   + (1 - torch.tanh(torch.ones_like(distance)*(threshold/std))) * (robot.period >= 2))

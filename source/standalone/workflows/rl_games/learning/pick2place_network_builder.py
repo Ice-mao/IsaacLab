@@ -35,7 +35,7 @@ class PickPlaceBuilder(NetworkBuilder):
             self.actor_mlp = nn.Sequential()
             self.critic_mlp = nn.Sequential()
 
-            self.state_dim = 45
+            self.state_dim = 45-3
             self.cnn_end_channel = 64
 
             cnn_base = ResNetBase([3, 3, 3], [16, 32, self.cnn_end_channel], None, img_channels=4, first_kernel_size=5)
@@ -82,16 +82,17 @@ class PickPlaceBuilder(NetworkBuilder):
             obs_camera = obs[:, self.state_dim:].contiguous().view(obs.size(0),4,640,480)
 
             a_out = self.actor_cnn(obs_camera)
-            out = a_out.contiguous().view(a_out.size(0), -1)
 
             # c_out = self.critic_cnn(c_out)
             # c_out = c_out.contiguous().view(c_out.size(0), -1)            
 
-            out = self.actor_mlp(out)
-            value = self.value_act(self.value(out))
+            mlp_in = torch.cat((a_out, obs_state), dim=1)
+
+            out = self.actor_mlp(mlp_in)
+            value = self.value_act(self.value(out)) # critic
 
             if self.is_continuous:
-                mu = self.mu_act(self.mu(out))
+                mu = self.mu_act(self.mu(out)) # action
                 if self.fixed_sigma:
                     sigma = self.sigma_act(self.sigma)
                 else:

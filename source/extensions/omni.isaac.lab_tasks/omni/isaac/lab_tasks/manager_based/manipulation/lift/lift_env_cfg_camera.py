@@ -112,10 +112,10 @@ class ObservationsCfg:
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-        # robot state obs: 45
+        # robot state obs: 45-3
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        # object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
         target_object_position_middle = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose_middle"})
         target_object_position = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
@@ -127,8 +127,24 @@ class ObservationsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
 
+    @configclass
+    class PrivilegeCfg(ObsGroup):
+        """Observations for Privilege group."""
+
+        # robot state obs: 45-3
+        joint_pos = ObsTerm(func=mdp.joint_pos_rel)
+        joint_vel = ObsTerm(func=mdp.joint_vel_rel)
+        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        target_object_position_middle = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose_middle"})
+        target_object_position = ObsTerm(func=mdp.target_position_in_robot_root_frame, params={"command_name": "object_pose"})
+        actions = ObsTerm(func=mdp.last_action)
+
+        def __post_init__(self):
+            self.enable_corruption = True
+            self.concatenate_terms = True
     # observation groups
     policy: PolicyCfg = PolicyCfg()
+    privilege: PrivilegeCfg = PrivilegeCfg()
 
 
 @configclass
